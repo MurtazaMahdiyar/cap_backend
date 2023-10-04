@@ -1,0 +1,35 @@
+from django.utils.translation import gettext_lazy as _
+from accounts.models import Student
+from django.db import models
+
+
+class Complaint(models.Model):
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='complaint')
+    title = models.CharField(max_length=254)
+    description = models.TextField()
+
+    class ComplaintStatus(models.TextChoices):
+        RECEIVED = 'RECEIVED', _('Received')
+        ACCEPTED = 'ACCEPTED', _('Accepted')
+        REJECTED = 'REJECTED', _('Rejected')
+
+    class ComplaintTarget(models.TextChoices):
+        STUDENT = 'STUDENT', _('Student')
+        TEACHER = 'TEACHER', _('Teacher')
+        STAFF = 'STAFF', _('Staff')
+
+    status = models.CharField(max_length=20, choices=ComplaintStatus.choices, default=ComplaintStatus.RECEIVED)
+    comment = models.CharField(max_length=254, default="Your complaint received! thank you.")
+    complaint_against = models.CharField(max_length=20, choices=ComplaintTarget.choices)
+
+    date_created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title
+
+class ComplaintDocument(models.Model):
+    document = models.FileField(upload_to='complaints/%Y/%m/%d')
+    complaint = models.ForeignKey(Complaint, related_name="document", on_delete=models.CASCADE)
+
+    def __str__(self):
+        return str(self.id) + ': ' + str(self.complaint)
