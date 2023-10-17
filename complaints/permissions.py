@@ -31,7 +31,7 @@ class ComplaintPermission(permissions.BasePermission):
             if request.user.profile_type == 'ADMIN':
                 admin = Admin.objects.get(pk=request.user.pk)
                 return request.user.profile_type == 'ADMIN' and obj.student.student_class.department.faculty == admin.faculty
-            return obj.student == request.user or (request.user.profile_type == 'SUPER_ADMIN')
+            return obj.profile == request.user or (request.user.profile_type == 'SUPER_ADMIN')
         elif view.action == 'destroy':
             return (obj.student == request.user and obj.status == Complaint.ComplaintStatus.RECEIVED) or (request.user.profile_type == 'SUPER_ADMIN')
         else:

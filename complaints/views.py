@@ -36,7 +36,10 @@ class ComplaintViewSet(ModelViewSet):
 			except:
 				pass
 		else:
-			serializer.validated_data.pop('status')
+			try:
+				serializer.validated_data.pop('status')
+			except:
+				pass
 
 		return super().perform_update(serializer)
 
@@ -44,10 +47,10 @@ class ComplaintViewSet(ModelViewSet):
 	def perform_create(self, serializer):
 		
 		complaint_faculty = None
-		if self.request.user.profile.profile_type == 'STUDENT':
-			complaint_faculty = Student.objects.get(pk=self.request.user.profile.pk).student_class.department.faculty
-		elif self.request.user.profile.profile_type == 'TEACHER':
-			complaint_faculty = Teacher.objects.get(pk=self.request.user.profile.pk).department.faculty
+		if self.request.user.profile_type == 'STUDENT':
+			complaint_faculty = Student.objects.get(pk=self.request.user.pk).student_class.department.faculty
+		elif self.request.user.profile_type == 'TEACHER':
+			complaint_faculty = Teacher.objects.get(pk=self.request.user.pk).department.faculty
 
 		serializer.validated_data['faculty'] = complaint_faculty
 
