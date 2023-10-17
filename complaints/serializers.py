@@ -1,30 +1,31 @@
 from rest_framework.serializers import ModelSerializer
 from .models import Complaint, ComplaintDocument
-from accounts.serializers import StudentSerializer
+from accounts.serializers import ProfileSerializer
 
 
 
 class ComplaintSerializer(ModelSerializer):
 
-	student_info = StudentSerializer(source='student', required=False)
+	profile_info = ProfileSerializer(source='profile', required=False)
 
 	class Meta:
 		fields = (
 			'id',
-			'student',
-			'student_info',
+			'profile',
+			'profile_info',
 			'title',
 			'description',
 			'status',
 			'comment',
 			'complaint_against',
 			'date_created',
+			'private',
 		)
 		model = Complaint
 
 		extra_kwargs = {
-            'student': {'required': True, 'write_only': True},
-            'student_info': {'required': False, 'read_only': True},
+            'profile': {'required': True, 'write_only': True},
+            'profile_info': {'required': False, 'read_only': True},
         }
 
 

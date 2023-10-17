@@ -5,7 +5,7 @@ class ProfilePermission(permissions.BasePermission):
     
     def has_permission(self, request, view):
         if view.action == 'list':
-            return request.user.is_authenticated and (request.user.profile_type == 'SUPER_ADMIN')
+            return request.user.is_authenticated and request.user.profile_type in ['SUPER_ADMIN', 'ADMIN']
         elif view.action == 'create':
             return request.user.is_authenticated
         elif view.action in ['retrieve', 'update', 'partial_update', 'destroy']:
@@ -19,7 +19,7 @@ class ProfilePermission(permissions.BasePermission):
             return False
 
         if view.action == 'retrieve':
-            return obj == request.user or (request.user.profile_type == 'SUPER_ADMIN')
+            return obj == request.user or request.user.profile_type in ['SUPER_ADMIN', 'ADMIN']
         elif view.action in ['update', 'partial_update']:
             return obj == request.user or request.user.profile_type in ['SUPER_ADMIN', 'ADMIN']
         elif view.action == 'destroy':
