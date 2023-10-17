@@ -49,7 +49,8 @@ class StudentPermission(permissions.BasePermission):
         if view.action == 'retrieve':
             return obj.pk == request.user.pk or (request.user.profile_type in ['ADMIN', 'SUPER_ADMIN'])
         elif view.action in ['update', 'partial_update']:
-            return request.user.pk == obj.pk and (request.user.profile_type in ['ADMIN', 'SUPER_ADMIN'])
+            print(obj.pk)
+            return request.user.pk == obj.pk or (request.user.profile_type in ['ADMIN', 'SUPER_ADMIN'])
         elif view.action == 'destroy':
             return request.user.is_authenticated and (request.user.profile_type in ['SUPER_ADMIN'])
         else:

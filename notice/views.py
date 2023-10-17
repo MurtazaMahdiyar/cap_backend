@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from .serializers import *
 from .models import AdminNotice, SuperAdminNotice, AudienceChoices
 from .permissions import AdminNoticePermission, SuperAdminNoticePermission
-
+from accounts.models import Student
 
 
 class AdminNoticeViewSet(ModelViewSet):
@@ -14,7 +14,8 @@ class AdminNoticeViewSet(ModelViewSet):
 
 	def list(self, request):
 		if request.user.profile_type == 'STUDENT':
-			if request.user.graduated:
+			student = Student.objects.get(pk=request.user.pk)
+			if student.graduated:
 				queryset = AdminNotice.objects.filter(audience=AudienceChoices.ALUMNUS)
 			else:
 				queryset = AdminNotice.objects.filter(audience=AudienceChoices.STUDENT)
@@ -48,7 +49,8 @@ class SuperAdminNoticeViewSet(ModelViewSet):
 
 	def list(self, request):
 		if request.user.profile_type == 'STUDENT':
-			if request.user.graduated:
+			student = Student.objects.get(pk=request.user.pk)
+			if student.graduated:
 				queryset = SuperAdminNotice.objects.filter(audience=AudienceChoices.ALUMNUS)
 			else:
 				queryset = SuperAdminNotice.objects.filter(audience=AudienceChoices.STUDENT)

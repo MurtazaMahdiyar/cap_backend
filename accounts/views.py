@@ -58,10 +58,13 @@ class StudentViewSet(ModelViewSet):
         
 
     def perform_update(self, serializer):
-        profile = serializer.validated_data['profile']
-        profile.profile_type = 'STUDENT'
+        try:
+            profile = serializer.validated_data['profile']
+            profile.profile_type = 'STUDENT'
+            profile.save()
+        except:
+            pass
         
-        profile.save()
         serializer.save()
 
     def perform_destroy(self, instance):

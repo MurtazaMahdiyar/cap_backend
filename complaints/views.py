@@ -2,7 +2,7 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from .serializers import *
 from .permissions import ComplaintPermission, ComplaintDocumentPermission
-from accounts.models import Admin
+from accounts.models import Admin, Student
 
 
 
@@ -13,7 +13,8 @@ class ComplaintViewSet(ModelViewSet):
 
 	def list(self, request):
 		if request.user.profile_type == 'STUDENT':
-			queryset = Complaint.objects.filter(student=request.user)
+			student = Student.objects.get(pk=request.user.pk)
+			queryset = Complaint.objects.filter(student=student)
 		elif request.user.profile_type == 'ADMIN':
 			admin = Admin.objects.get(pk=request.user.id)
 			queryset = Complaint.objects.filter(student__student_class__department__faculty=admin.faculty)
