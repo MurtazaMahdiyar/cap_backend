@@ -1,10 +1,15 @@
 from rest_framework.viewsets import ModelViewSet
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
+from django.db.models import Q
 from .serializers import *
-from .models import AdminNotice, SuperAdminNotice, AudienceChoices
+from .models import Notice, AdminNotice, SuperAdminNotice, AudienceChoices
 from .permissions import AdminNoticePermission, SuperAdminNoticePermission
-from accounts.models import Student
+from accounts.models import Student, Admin, SuperAdmin
+
+
+class NoticeViewSet(ModelViewSet):
+	queryset = Notice.objects.all()
 
 
 class AdminNoticeViewSet(ModelViewSet):
@@ -16,11 +21,11 @@ class AdminNoticeViewSet(ModelViewSet):
 		if request.user.profile_type == 'STUDENT':
 			student = Student.objects.get(pk=request.user.pk)
 			if student.graduated:
-				queryset = AdminNotice.objects.filter(audience=AudienceChoices.ALUMNUS)
+				queryset = AdminNotice.objects.filter(Q(audience=AudienceChoices.ALUMNUS) | Q(audience=AudienceChoices.ALL))
 			else:
-				queryset = AdminNotice.objects.filter(audience=AudienceChoices.STUDENT)
+				queryset = AdminNotice.objects.filter(Q(audience=AudienceChoices.STUDENT) | Q(audience=AudienceChoices.ALL))
 		elif request.user.profile_type == 'TEACHER':
-			queryset = AdminNotice.objects.filter(audience=AudienceChoices.TEACHER)
+			queryset = AdminNotice.objects.filter(Q(audience=AudienceChoices.TEACHER) | Q(audience=AudienceChoices.ALL))
 		else:
 			queryset = AdminNotice.objects.all()
 		serializer = AdminNoticeSerializer(queryset, many=True)
@@ -29,17 +34,22 @@ class AdminNoticeViewSet(ModelViewSet):
 
 	def retrieve(self, request, pk=None):
 		if request.user.profile_type == 'STUDENT':
-			if request.user.graduated:
-				queryset = AdminNotice.objects.filter(audience=AudienceChoices.ALUMNUS)
+			student = Student.objects.get(pk=request.user.pk)
+			if student.graduated:
+				queryset = AdminNotice.objects.filter(Q(audience=AudienceChoices.ALUMNUS) | Q(audience=AudienceChoices.ALL))
 			else:
-				queryset = AdminNotice.objects.filter(audience=AudienceChoices.STUDENT)
+				queryset = AdminNotice.objects.filter(Q(audience=AudienceChoices.STUDENT) | Q(audience=AudienceChoices.ALL))
 		elif request.user.profile_type == 'TEACHER':
-			queryset = AdminNotice.objects.filter(audience=AudienceChoices.TEACHER)
-		else:
+			queryset = AdminNotice.objects.filter(Q(audience=AudienceChoices.TEACHER) | Q(audience=AudienceChoices.ALL))
+		elif request.user.profile_type in ['ADMIN', 'SUPER_ADMIN']:
 			queryset = AdminNotice.objects.all()
-		user = get_object_or_404(queryset, pk=pk)
-		serializer = AdminNoticeSerializer(user)
+		notice = get_object_or_404(queryset, pk=pk)
+		serializer = AdminNoticeSerializer(notice)
 		return Response(serializer.data)
+
+	def perform_create(self, serializer):
+		serializer.validated_data['author'] = Admin.objects.get(pk = self.request.user.pk)
+		return super().perform_create(serializer)
 
 class SuperAdminNoticeViewSet(ModelViewSet):
 	queryset = SuperAdminNotice.objects.all()
@@ -51,13 +61,13 @@ class SuperAdminNoticeViewSet(ModelViewSet):
 		if request.user.profile_type == 'STUDENT':
 			student = Student.objects.get(pk=request.user.pk)
 			if student.graduated:
-				queryset = SuperAdminNotice.objects.filter(audience=AudienceChoices.ALUMNUS)
+				queryset = SuperAdminNotice.objects.filter(Q(audience=AudienceChoices.ALUMNUS) | Q(audience=AudienceChoices.ALL))
 			else:
-				queryset = SuperAdminNotice.objects.filter(audience=AudienceChoices.STUDENT)
+				queryset = SuperAdminNotice.objects.filter(Q(audience=AudienceChoices.STUDENT) | Q(audience=AudienceChoices.ALL))
 		elif request.user.profile_type == 'TEACHER':
-			queryset = SuperAdminNotice.objects.filter(audience=AudienceChoices.TEACHER)
+			queryset = SuperAdminNotice.objects.filter(Q(audience=AudienceChoices.TEACHER) | Q(audience=AudienceChoices.ALL))
 		elif request.user.profile_type == 'ADMIN':
-			queryset = SuperAdminNotice.objects.filter(audience=AudienceChoices.STAFF)
+			queryset = SuperAdminNotice.objects.filter(Q(audience=AudienceChoices.STAFF) | Q(audience=AudienceChoices.ALL))
 		else:
 			queryset = SuperAdminNotice.objects.all()
 		serializer = SuperAdminNoticeSerializer(queryset, many=True)
@@ -65,16 +75,21 @@ class SuperAdminNoticeViewSet(ModelViewSet):
 	
 	def retrieve(self, request, pk=None):
 		if request.user.profile_type == 'STUDENT':
-			if request.user.graduated:
-				queryset = SuperAdminNotice.objects.filter(audience=AudienceChoices.ALUMNUS)
+			student = Student.objects.get(pk=request.user.pk)
+			if student.graduated:
+				queryset = SuperAdminNotice.objects.filter(Q(audience=AudienceChoices.ALUMNUS) | Q(audience=AudienceChoices.ALL))
 			else:
-				queryset = SuperAdminNotice.objects.filter(audience=AudienceChoices.STUDENT)
+				queryset = SuperAdminNotice.objects.filter(Q(audience=AudienceChoices.STUDENT) | Q(audience=AudienceChoices.ALL))
 		elif request.user.profile_type == 'TEACHER':
-			queryset = SuperAdminNotice.objects.filter(audience=AudienceChoices.TEACHER)
+			queryset = SuperAdminNotice.objects.filter(Q(audience=AudienceChoices.TEACHER) | Q(audience=AudienceChoices.ALL))
 		elif request.user.profile_type == 'ADMIN':
-			queryset = SuperAdminNotice.objects.filter(audience=AudienceChoices.STAFF)
+			queryset = SuperAdminNotice.objects.filter(Q(audience=AudienceChoices.STAFF) | Q(audience=AudienceChoices.ALL))
 		else:
 			queryset = SuperAdminNotice.objects.all()
-		user = get_object_or_404(queryset, pk=pk)
-		serializer = SuperAdminNoticeSerializer(user)
+		notice = get_object_or_404(queryset, pk=pk)
+		serializer = SuperAdminNoticeSerializer(notice)
 		return Response(serializer.data)
+
+	def perform_create(self, serializer):
+		serializer.validated_data['author'] = SuperAdmin.objects.get(pk=self.request.user.pk)
+		return super().perform_create(serializer)

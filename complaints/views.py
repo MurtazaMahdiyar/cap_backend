@@ -1,6 +1,7 @@
 from django.db.models import Q
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
 from .serializers import *
 from .permissions import ComplaintPermission, ComplaintDocumentPermission
 from accounts.models import Admin, Student, Teacher
@@ -25,6 +26,13 @@ class ComplaintViewSet(ModelViewSet):
 
 		serializer = ComplaintSerializer(queryset, many=True)
 		return Response(serializer.data)
+
+	def retrieve(self, request, pk = None, *args, **kwargs):
+		queryset = Complaint.objects.prefetch_related('document').all()
+		complaint = get_object_or_404(queryset, pk=pk)
+		serializer = ComplaintSerializer(complaint)
+		return Response(serializer.data)
+	
 
 	def perform_update(self, serializer):
 
@@ -53,6 +61,7 @@ class ComplaintViewSet(ModelViewSet):
 			complaint_faculty = Teacher.objects.get(pk=self.request.user.pk).department.faculty
 
 		serializer.validated_data['faculty'] = complaint_faculty
+		serializer.validated_data['profile'] = self.request.user
 
 		return super().perform_create(serializer)
 
@@ -62,8 +71,8 @@ class ComplaintDocumentViewSet(ModelViewSet):
 	permission_classes = (ComplaintDocumentPermission, )
 
 	def list(self, request):
-		if request.user.profile_type == 'STUDENT':
-			queryset = ComplaintDocument.objects.filter(complaint__student=request.user.pk)
+		if request.user.profile_type in ['STUDENT', 'TEACHER']:
+			queryset = ComplaintDocument.objects.filter(complaint__profile=request.user)
 		elif request.user.profile_type == 'ADMIN':
 			admin = Admin.objects.get(pk=request.user.pk)
 			queryset = Complaint.objects.filter(Q(complaint__student__student_class__department__faculty=admin.faculty) & ~Q(complaint__complaint_against = 'STAFF'))

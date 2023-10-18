@@ -28,8 +28,6 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 class AdminNoticeSerializer(ModelSerializer):
 
-	author_info = AdminSerializer(source='author', required=False)
-
 	class Meta:
 		fields = (
 			'id',
@@ -37,21 +35,12 @@ class AdminNoticeSerializer(ModelSerializer):
 			'description',
 			'attachment',
 			'registry_date',
-			'author',
-			'author_info',
 			'audience',
 		)
 		model = AdminNotice
 
-		extra_kwargs = {
-			'author_info': {'read_only': True},
-			'author': {'required': True, 'write_only': True},
-		}
-
 
 class SuperAdminNoticeSerializer(ModelSerializer):
-
-	author_info = SuperAdminSerializer(source='author', required=False)
 
 	class Meta:
 		fields = (
@@ -60,13 +49,9 @@ class SuperAdminNoticeSerializer(ModelSerializer):
 			'description',
 			'attachment',
 			'registry_date',
-			'author',
-			'author_info',
 			'audience',
 		)
 		model = SuperAdminNotice
 
 		extra_kwargs = {
-			'author_info': {'read_only': True},
-			'author': {'required': True, 'write_only': True},
 		}
