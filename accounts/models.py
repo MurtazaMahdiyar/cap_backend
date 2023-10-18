@@ -51,7 +51,6 @@ class ProfileType(models.TextChoices):
 	SUPER_ADMIN = 'SUPER_ADMIN', _('Super Admin')
 
 
-
 class Profile(AbstractUser):
 	first_name = models.CharField(verbose_name='First name', max_length=255)
 	last_name = models.CharField(verbose_name='Last name', max_length=255)
@@ -114,7 +113,7 @@ class Student(models.Model):
 
 	university_id = models.CharField(max_length=50, unique=True)
 	father_name = models.CharField(max_length=100)
-	student_class = models.ForeignKey(Class, on_delete=models.CASCADE)
+	student_class = models.ForeignKey(Class, related_name='students', on_delete=models.CASCADE)
 	university_id_photo = models.ImageField(upload_to='image/university_id/%Y/%m/%d', blank=True)
 	graduated = models.BooleanField(default=False)
 
@@ -134,7 +133,7 @@ class Student(models.Model):
 
 class Teacher(models.Model):
 	profile = models.OneToOneField(Profile, on_delete=models.CASCADE, primary_key=True, default=1)
-	department = models.ForeignKey(Department, on_delete=models.CASCADE)
+	department = models.ForeignKey(Department, related_name='teachers', on_delete=models.CASCADE)
 
 	class Meta:
 		verbose_name = 'Teacher'

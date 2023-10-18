@@ -7,7 +7,7 @@ import datetime
 
 
 class Job(models.Model):
-	student = models.ForeignKey(Student, on_delete=models.CASCADE)
+	student = models.ForeignKey(Student, related_name='jobs', on_delete=models.CASCADE)
 	company = models.CharField(max_length=100)
 	title = models.CharField(max_length=100)
 	position = models.CharField(max_length=254)
@@ -24,7 +24,7 @@ class Job(models.Model):
 	
 
 class Scholarship(models.Model):
-	student = models.ForeignKey(Student, on_delete=models.CASCADE)
+	student = models.ForeignKey(Student, related_name='scholarships', on_delete=models.CASCADE)
 	country = models.CharField(max_length=100)
 	university = models.CharField(max_length=150)
 	study_field = models.CharField(max_length=254)
@@ -46,7 +46,7 @@ class Subject(models.Model):
 	subject_name = models.CharField(max_length=150)
 	number_of_credits = models.PositiveSmallIntegerField(default=1)
 	teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
-	subject_class = models.ForeignKey(Class, on_delete=models.CASCADE)
+	subject_class = models.ForeignKey(Class, related_name='subjects', on_delete=models.CASCADE)
 	semester = models.PositiveSmallIntegerField(default=1, validators=[
 		MaxValueValidator(8),
 		MinValueValidator(1),
@@ -60,8 +60,8 @@ class Subject(models.Model):
 
 
 class ResultSheet(models.Model):
-	student = models.ForeignKey(Student, on_delete=models.CASCADE)
-	subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
+	student = models.ForeignKey(Student, related_name='students', on_delete=models.CASCADE)
+	subject = models.ForeignKey(Subject, related_name='resultsheets', on_delete=models.CASCADE)
 	mark = models.PositiveSmallIntegerField(validators=[
 		MaxValueValidator(100),
 		MinValueValidator(1),

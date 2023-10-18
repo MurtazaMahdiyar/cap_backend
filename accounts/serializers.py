@@ -40,10 +40,61 @@ class DepartmentSerializer(ModelSerializer):
             'faculty_info': {'required': False, 'read_only': True},
         }
 
+    
+class SubjectSerializer(ModelSerializer):
+
+    class Meta:
+        fields = (
+            'id',
+            'subject_code',
+            'subject_name',
+            'number_of_credits',
+            'teacher',
+            'subject_class',
+            'semester',
+        )
+        model = Subject
+
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Subject.objects.all(),
+                fields=['subject_code', 'semester', 'subject_class'],
+                message='Subject with given subject_code and semester already exists.',
+            ),
+        ]
+
+class ResultSheetSerializer(ModelSerializer):
+
+    subject_info = SubjectSerializer(source='subject', required=False)
+
+    class Meta:
+        fields = (
+            'id',
+            'student',
+            'subject',
+            'subject_info',
+            'mark',
+        )
+        model = ResultSheet
+        
+        extra_kwargs = {
+            'subject': {'required': True, 'write_only': True},
+            'student': {'required': True, 'write_only': True},
+        }
+
+        validators = [
+            UniqueTogetherValidator(
+                queryset=ResultSheet.objects.all(),
+                fields=['student', 'subject', ],
+                message='Student with given subject has been already registered.',
+            ),
+        ]
+
 
 class ClassSerializer(ModelSerializer):
 
     department_info = DepartmentSerializer(source='department', required=False)
+    subject_list = SubjectSerializer(source='subjects', many=True, required=False)
     year = IntegerField(required=True)
 
     class Meta:
@@ -53,12 +104,14 @@ class ClassSerializer(ModelSerializer):
             'name',
             'department',
             'department_info',
+            'subject_list',
         )
         model = Class
 
         extra_kwargs = {
             'department': {'required': True, 'write_only': True},
             'department_info': {'read_only': True},
+            'subject_list': {'read_only': True},
         }
 
         validators = [
@@ -98,43 +151,12 @@ class ProfileSerializer(ModelSerializer):
         }
 
 
-class StudentSerializer(ModelSerializer):
-
-    student_profile = ProfileSerializer(source='profile', required=False)
-    student_class_info = ClassSerializer(source='student_class', required=False)
-
-    class Meta:
-        fields = (
-            'profile',
-            'student_profile',
-            'university_id',
-            'father_name',
-            'student_class',
-            'student_class_info',
-            'university_id_photo',
-            'graduated',
-            'status',
-        )
-        model = Student
-        extra_kwargs = {
-            'student_profile': {'read_only': True},
-            'student_class_info': {'read_only': True},
-            'profile': {'required': True, 'write_only': True},
-            'student_class': {'required': True, 'write_only': True},
-            'university_id_photo': {'required': True},
-        }
-        
-
-
 class JobSerializer(ModelSerializer):
     
-    student_info = StudentSerializer(source='student', required=False)
-
     class Meta:
         fields = (
             'id',
             'student',
-            'student_info',
             'title',
             'position',
             'company',
@@ -147,7 +169,6 @@ class JobSerializer(ModelSerializer):
         extra_kwargs = {
             'student': {'required': True, 'write_only': True},
             'start_date': {'required': True},
-            'student_info': {'required': False, 'read_only': True},
         }
 
         validators = [
@@ -161,13 +182,10 @@ class JobSerializer(ModelSerializer):
 
 class ScholarshipSerializer(ModelSerializer):
 
-    student_info = StudentSerializer(source='student', required=False)
-
     class Meta:
         fields = (
             'id',
             'student',
-            'student_info',
             'country',
             'university',
             'study_field',
@@ -177,11 +195,6 @@ class ScholarshipSerializer(ModelSerializer):
         )
         model = Scholarship
 
-        extra_kwargs = {
-            'student': {'required': True, 'write_only': True},
-            'student_info': {'required': False, 'read_only': True},
-        }
-
         validators = [
             UniqueTogetherValidator(
                 queryset=Scholarship.objects.all(),
@@ -189,6 +202,42 @@ class ScholarshipSerializer(ModelSerializer):
                 message='Scholarship for this student in this date already exists.',
             ),
         ]
+
+
+class StudentSerializer(ModelSerializer):
+
+    student_profile = ProfileSerializer(source='profile', required=False)
+    # student_class_info = ClassSerializer(source='student_class', required=False)
+    job_list = JobSerializer(source='jobs', required=False, many=True)
+    scholarship_list = ScholarshipSerializer(source='scholarships', required=False, many=True)
+    resultsheets = ResultSheetSerializer(source='students', required=False, many=True)
+
+    class Meta:
+        fields = (
+            'profile',
+            'student_profile',
+            'university_id',
+            'father_name',
+            'student_class',
+            'resultsheets',
+            'university_id_photo',
+            'graduated',
+            'job_list',
+            'scholarship_list',
+            'status',
+        )
+        model = Student
+        extra_kwargs = {
+            'student_profile': {'read_only': True},
+            # 'student_class_info': {'read_only': True},
+            'job_list': {'read_only': True},
+            'scholarship_list': {'read_only': True},
+            'profile': {'required': True, 'write_only': True},
+            'student_class': {'required': True, 'write_only': True},
+            'resultsheets': {'read_only': True},
+            'university_id_photo': {'required': True},
+        }
+        
 
 
 
@@ -213,74 +262,6 @@ class TeacherSerializer(ModelSerializer):
             'department': {'required': True, 'write_only': True},
         }
 
-
-class SubjectSerializer(ModelSerializer):
-
-    subject_class_info = ClassSerializer(source='subject_class', required=False)
-    teacher_info = TeacherSerializer(source='teacher', required=False)
-
-    class Meta:
-        fields = (
-            'id',
-            'subject_code',
-            'subject_name',
-            'number_of_credits',
-            'teacher',
-            'teacher_info',
-            'subject_class',
-            'subject_class_info',
-            'semester',
-        )
-        model = Subject
-
-        extra_kwargs = {
-            'teacher_info': {'read_only': True},
-            'subject_class_info': {'read_only': True},
-            'teacher': {'required': True, 'write_only': True},
-            'subject_class': {'required': True, 'write_only': True},
-        }
-
-        validators = [
-            UniqueTogetherValidator(
-                queryset=Subject.objects.all(),
-                fields=['subject_code', 'semester', 'subject_class'],
-                message='Subject with given subject_code and semester already exists.',
-            ),
-        ]
-
-
-class ResultSheetSerializer(ModelSerializer):
-
-    student_info = StudentSerializer(source='student', required=False)
-    subject_info = SubjectSerializer(source='subject', required=False)
-
-    class Meta:
-        fields = (
-            'id',
-            'student',
-            'student_info',
-            'subject',
-            'subject_info',
-            'mark',
-        )
-        model = ResultSheet
-        
-        extra_kwargs = {
-            'subject': {'required': True, 'write_only': True},
-            'subject_info': {'read_only': True},
-            'student': {'required': True, 'write_only': True},
-            'student_info': {'read_only': True},
-        }
-
-        validators = [
-            UniqueTogetherValidator(
-                queryset=ResultSheet.objects.all(),
-                fields=['student', 'subject', ],
-                message='Student with given subject has been already registered.',
-            ),
-        ]
-
-    
 
 
 class AdminSerializer(ModelSerializer):

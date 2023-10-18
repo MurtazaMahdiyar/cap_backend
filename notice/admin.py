@@ -1,6 +1,5 @@
 from django.contrib import admin
-from .models import AdminNotice, SuperAdminNotice
+from .models import Notice
 # Register your models here.
 
-admin.site.register(AdminNotice)
-admin.site.register(SuperAdminNotice)
+admin.site.register(Notice)

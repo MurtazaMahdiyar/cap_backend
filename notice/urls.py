@@ -1,7 +1,7 @@
 from complaints.urls import router
 from django.urls import path, include
 from .views import (
-	AdminNoticeViewSet, SuperAdminNoticeViewSet
+	NoticeViewSet
 )
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -9,8 +9,7 @@ from rest_framework_simplejwt.views import (
 )
 
 
-router.register('admin-notices', AdminNoticeViewSet, basename='admin-notice')
-router.register('super-admin-notices', SuperAdminNoticeViewSet, basename='super-admin-notice')
+router.register('notices', NoticeViewSet, basename='notice')
 
 
 urlpatterns = [

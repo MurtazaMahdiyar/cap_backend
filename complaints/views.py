@@ -14,6 +14,7 @@ class ComplaintViewSet(ModelViewSet):
 	permission_classes = (ComplaintPermission, )
 
 	def list(self, request):
+		queryset = Complaint.objects.prefetch_related('document').all()
 		if request.user.profile_type in ['STUDENT', 'TEACHER']:
 			queryset = Complaint.objects.filter(profile__id=request.user.id)
 

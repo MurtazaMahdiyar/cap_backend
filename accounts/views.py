@@ -1,4 +1,5 @@
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.response import Response
 from django.contrib.auth.hashers import make_password
 from .permissions import (
     AdminPermission, SuperAdminPermission, TeacherPermission,
@@ -47,6 +48,11 @@ class StudentViewSet(ModelViewSet):
     serializer_class = StudentSerializer
     permission_classes = (StudentPermission, )
 
+
+    def list(self, request):
+        queryset = Student.objects.prefetch_related(*['jobs', 'scholarships']).all()
+        serializer = StudentSerializer(queryset, many=True)
+        return Response(serializer.data)
 
     def perform_create(self, serializer):
         if serializer.validated_data['profile'].profile_type == '':

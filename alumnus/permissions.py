@@ -92,7 +92,7 @@ class ResultSheetPermission(permissions.BasePermission):
         if view.action == 'list':
             return request.user.is_authenticated and (request.user.profile_type in ['SUPER_ADMIN', 'ADMIN', 'TEACHER'])
         elif view.action == 'create':
-            return request.user.is_authenticated and (request.user.profile_type == ['TEACHER'])
+            return request.user.is_authenticated and (request.user.profile_type == 'TEACHER')
         elif view.action in ['retrieve', 'update', 'partial_update', 'destroy']:
             return True
         else:

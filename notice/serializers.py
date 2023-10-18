@@ -1,10 +1,9 @@
 from rest_framework.serializers import ModelSerializer
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from .models import (
-	 AdminNotice,
-	 SuperAdminNotice,
+	Notice,
 )
-from accounts.serializers import AdminSerializer, SuperAdminSerializer
+from accounts.serializers import ProfileSerializer
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 	@classmethod
@@ -25,33 +24,22 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 		return token
 
+class NoticeSerializer(ModelSerializer):
 
-class AdminNoticeSerializer(ModelSerializer):
+	author_info = ProfileSerializer(source='author', required=False)
 
 	class Meta:
 		fields = (
 			'id',
+			'author_info',
 			'title',
 			'description',
 			'attachment',
 			'registry_date',
 			'audience',
 		)
-		model = AdminNotice
-
-
-class SuperAdminNoticeSerializer(ModelSerializer):
-
-	class Meta:
-		fields = (
-			'id',
-			'title',
-			'description',
-			'attachment',
-			'registry_date',
-			'audience',
-		)
-		model = SuperAdminNotice
+		model = Notice
 
 		extra_kwargs = {
+            'author_info': {'required': False, 'read_only': True},
 		}

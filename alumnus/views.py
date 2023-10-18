@@ -37,6 +37,11 @@ class ClassViewSet(ModelViewSet):
     serializer_class = ClassSerializer
     permission_classes = (ClassPermission, )
 
+    def list(self, request):
+        queryset = Class.objects.all()
+        serializer = ClassSerializer(queryset, many=True)
+        return Response(serializer.data)
+
     
 class SubjectViewSet(ModelViewSet):
     queryset = Subject.objects.all()
@@ -53,7 +58,7 @@ class ResultSheetViewSet(ModelViewSet):
         if request.user.profile_type == 'STUDENT':
             queryset = ResultSheet.objects.filter(subject__class=request.user.student_class)
         elif request.user.profile_type == 'TEACHER':
-            queryset = ResultSheet.objects.filter(subject__teacher=request.user)
+            queryset = ResultSheet.objects.filter(subject__teacher__profile=request.user)
         elif request.user.profile_type == 'ADMIN':
             admin = Admin.objects.get(pk=request.user.pk)
             queryset = ResultSheet.objects.filter(subject__class__department__faculty=admin.faculty)
