@@ -219,12 +219,12 @@ class StudentSerializer(ModelSerializer):
             'university_id',
             'father_name',
             'student_class',
-            'resultsheets',
             'university_id_photo',
             'graduated',
-            'job_list',
-            'scholarship_list',
             'status',
+            'job_list',
+            'resultsheets',
+            'scholarship_list',
         )
         model = Student
         extra_kwargs = {
