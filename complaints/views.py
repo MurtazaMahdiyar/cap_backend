@@ -23,7 +23,7 @@ class ComplaintViewSet(ModelViewSet):
 			queryset = Complaint.objects.filter(~Q(complaint_against = 'STAFF') & Q(faculty=admin.faculty) & Q(private=False))
 
 		elif request.user.profile_type == 'SUPER_ADMIN':
-			queryset = Complaint.objects.all()
+			queryset = Complaint.objects.filter(complaint_against='STAFF')
 
 		serializer = ComplaintSerializer(queryset, many=True)
 		return Response(serializer.data)

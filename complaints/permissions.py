@@ -25,13 +25,13 @@ class ComplaintPermission(permissions.BasePermission):
         if view.action == 'retrieve':
             if request.user.profile_type == 'ADMIN':
                 admin = Admin.objects.get(pk=request.user.pk)
-                return obj.faculty == admin.faculty and obj.complaint_against != Complaint.ComplaintTarget.STAFF
+                return (obj.faculty == admin.faculty) and (obj.complaint_against != Complaint.ComplaintTarget.STAFF)
             return obj.profile == request.user or (request.user.profile_type == 'SUPER_ADMIN')
 
         elif view.action in ['update', 'partial_update']:
             if request.user.profile_type == 'ADMIN':
                 admin = Admin.objects.get(pk=request.user.pk)
-                return request.user.profile_type == 'ADMIN' and obj.student.student_class.department.faculty == admin.faculty
+                return (obj.faculty == admin.faculty) and (obj.complaint_against != Complaint.ComplaintTarget.STAFF)
             return obj.profile == request.user or (request.user.profile_type == 'SUPER_ADMIN')
 
         elif view.action == 'destroy':
@@ -62,7 +62,7 @@ class ComplaintDocumentPermission(permissions.BasePermission):
         if view.action == 'retrieve':
             if request.user.profile_type == 'ADMIN':
                 admin = Admin.objects.get(pk=request.user.pk)
-                return request.user.profile_type == 'ADMIN' and obj.student.student_class.department.faculty == admin.faculty
+                return request.user.profile_type == 'ADMIN' and obj.complaint.faculty == admin.faculty
 
             return obj.complaint.profile == request.user or (request.user.profile_type == 'SUPER_ADMIN')
 

@@ -1,5 +1,5 @@
 from django.utils.translation import gettext_lazy as _
-from accounts.models import Profile, Admin, SuperAdmin
+from accounts.models import Profile, Admin, SuperAdmin, Faculty
 from django.db import models
 
 
@@ -18,6 +18,7 @@ class Notice(models.Model):
 
     author = models.ForeignKey(Profile, on_delete=models.CASCADE)
     audience = models.CharField(max_length=20, choices=AudienceChoices.choices)
+    faculty = models.ForeignKey(Faculty, on_delete=models.CASCADE, default=1)
 
     def __str__(self):
         return self.title

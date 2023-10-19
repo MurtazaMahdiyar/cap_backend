@@ -5,7 +5,7 @@ class JobScholarshipPermission(permissions.BasePermission):
 
     def has_permission(self, request, view):
         if view.action == 'list':
-            return request.user.is_authenticated and (request.user.profile_type in ['SUPER_ADMIN', 'ADMIN'])
+            return request.user.is_authenticated and (request.user.profile_type in ['SUPER_ADMIN', 'ADMIN', 'STUDENT'])
         elif view.action == 'create':
             return request.user.is_authenticated and request.user.profile_type == 'STUDENT'
         elif view.action in ['retrieve', 'update', 'partial_update', 'destroy']:
@@ -19,7 +19,10 @@ class JobScholarshipPermission(permissions.BasePermission):
             return False
 
         if view.action == 'retrieve':
-            return obj.student == request.user or (request.user.profile_type in ['SUPER_ADMIN', 'ADMIN'])
+            if request.user.profile_type == 'ADMIN':
+                admin = Admin.objects.get(pk=request.user.pk)
+                return obj.student.student_class.department.faculty == admin.faculty
+            return obj.student == request.user or (request.user.profile_type in ['SUPER_ADMIN', 'ADMIN', 'STUDENT'])
         elif view.action in ['update', 'partial_update']:
             return obj.student == request.user
         elif view.action == 'destroy':
