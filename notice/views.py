@@ -5,7 +5,7 @@ from django.db.models import Q
 from .serializers import *
 from .models import Notice, AudienceChoices
 from .permissions import NoticePermission
-from accounts.models import Student, Admin, SuperAdmin
+from accounts.models import Student, Admin, SuperAdmin, Teacher
 
 
 class NoticeViewSet(ModelViewSet):
@@ -17,17 +17,17 @@ class NoticeViewSet(ModelViewSet):
 		if request.user.profile_type == 'STUDENT':
 			student = Student.objects.get(pk=request.user.pk)
 			if student.graduated:
-				queryset = Notice.objects.filter((Q(audience=AudienceChoices.ALUMNUS) | Q(audience=AudienceChoices.ALL)) and (Q(faculty=student.student_class.department.faculty)))
+				queryset = Notice.objects.filter((Q(audience=AudienceChoices.ALUMNUS) | Q(audience=AudienceChoices.ALL)) and Q(faculty=student.student_class.department.faculty))
 			else:
-				queryset = Notice.objects.filter((Q(audience=AudienceChoices.STUDENT) | Q(audience=AudienceChoices.ALL)) and (Q(faculty=student.student_class.department.faculty)))
+				queryset = Notice.objects.filter((Q(audience=AudienceChoices.STUDENT) | Q(audience=AudienceChoices.ALL)) and Q(faculty=student.student_class.department.faculty))
 
 		elif request.user.profile_type == 'TEACHER':
 			teacher = Teacher.objects.get(pk=request.user.pk)
-			queryset = Notice.objects.filter((Q(audience=AudienceChoices.TEACHER) | Q(audience=AudienceChoices.ALL)) and (Q(faculty=teacher.department.faculty)))
+			queryset = Notice.objects.filter((Q(audience=AudienceChoices.TEACHER) | Q(audience=AudienceChoices.ALL)) and Q(faculty=teacher.department.faculty))
 
 		elif request.user.profile_type == 'ADMIN':
 			admin = Admin.objects.get(pk=request.user.pk)
-			queryset = Notice.objects.filter((Q(audience=AudienceChoices.TEACHER) | Q(audience=AudienceChoices.ALL)) and (Q(faculty=admin.faculty)))
+			queryset = Notice.objects.filter((Q(audience=AudienceChoices.STAFF) | Q(audience=AudienceChoices.ALL)) and (Q(faculty=admin.faculty) | Q(faculty__isnull=True)))
 
 		elif request.user.profile_type == 'SUPER_ADMIN':
 			queryset = Notice.objects.filter(author=request.user)
@@ -49,11 +49,12 @@ class NoticeViewSet(ModelViewSet):
 
 		elif request.user.profile_type == 'ADMIN':
 			admin = Admin.objects.get(pk=request.user.pk)
-			queryset = Notice.objects.filter((Q(audience=AudienceChoices.STAFF) | Q(audience=AudienceChoices.ALL)) and Q(faculty=admin.faculty))
+			queryset = Notice.objects.filter((Q(audience=AudienceChoices.STAFF) | Q(audience=AudienceChoices.ALL)) and (Q(faculty=admin.faculty) | Q(faculty__isnull=True)))
 
 		elif request.user.profile_type == 'SUPER_ADMIN':
-			queryset = Notice.objects.filter(Q(author=request.user) | Q(audience=AudienceChoices.ALL))
+			queryset = Notice.objects.filter(author=request.user)
 
+		serializer = NoticeSerializer(queryset, many=True)
 		return Response(serializer.data)
 
 
@@ -62,8 +63,6 @@ class NoticeViewSet(ModelViewSet):
 		notice_faculty = None
 		if self.request.user.profile_type == 'ADMIN':
 			notice_faculty = Admin.objects.get(pk=self.request.user.pk).faculty
-		elif self.request.user.profile_type == 'SUPER_ADMIN':
-			notice_faculty = SuperAdmin.objects.get(pk=self.request.user.pk).faculty
 
 		serializer.validated_data['faculty'] = notice_faculty
 		serializer.validated_data['author'] = self.request.user

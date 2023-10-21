@@ -26,10 +26,12 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 class NoticeSerializer(ModelSerializer):
 
+	author_info = ProfileSerializer(source='author', required=False)
+
 	class Meta:
 		fields = (
 			'id',
-			'author',
+			'author_info',
 			'title',
 			'description',
 			'attachment',
@@ -39,5 +41,5 @@ class NoticeSerializer(ModelSerializer):
 		model = Notice
 
 		extra_kwargs = {
-            'author': {'required': False, 'read_only': True},
+            'author_info': {'required': False, 'read_only': True},
 		}

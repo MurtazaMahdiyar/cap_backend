@@ -20,7 +20,7 @@ class ComplaintViewSet(ModelViewSet):
 
 		elif request.user.profile_type == 'ADMIN':
 			admin = Admin.objects.get(pk=request.user.id)
-			queryset = Complaint.objects.filter(~Q(complaint_against = 'STAFF') & Q(faculty=admin.faculty) & Q(private=False))
+			queryset = Complaint.objects.filter(~Q(complaint_against = 'STAFF') & Q(faculty=admin.faculty))
 
 		elif request.user.profile_type == 'SUPER_ADMIN':
 			queryset = Complaint.objects.filter(complaint_against='STAFF')

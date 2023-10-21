@@ -21,7 +21,7 @@ class JobViewSet(ModelViewSet):
         queryset = Job.objects.all()
         print(request.user.profile_type)
         if request.user.profile_type == 'STUDENT':
-            queryset = Job.objects.filter(student__profile=request.user)
+            queryset = Job.objects.filter(student__profile__id=request.user.pk)
 
         elif request.user.profile_type == 'ADMIN':
             admin = Admin.objects.get(pk=request.user.id)
@@ -49,7 +49,7 @@ class ScholarshipViewSet(ModelViewSet):
     def list(self, request):
         queryset = Scholarship.objects.all()
         if request.user.profile_type == 'STUDENT':
-            queryset = Scholarship.objects.filter(student__profile=request.user)
+            queryset = Scholarship.objects.filter(student__profile__id=request.user.pk)
 
         elif request.user.profile_type == 'ADMIN':
             admin = Admin.objects.get(pk=request.user.id)
