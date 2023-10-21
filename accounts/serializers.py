@@ -156,9 +156,7 @@ class JobSerializer(ModelSerializer):
     class Meta:
         fields = (
             'id',
-            'student',
             'title',
-            'position',
             'company',
             'description',
             'start_date',
@@ -167,17 +165,8 @@ class JobSerializer(ModelSerializer):
         model = Job
 
         extra_kwargs = {
-            'student': {'required': True, 'write_only': True},
             'start_date': {'required': True},
         }
-
-        validators = [
-            UniqueTogetherValidator(
-                queryset=Job.objects.all(),
-                fields=['student', 'title', 'start_date'],
-                message='Job for this student in this date already exists.',
-            ),
-        ]
 
 
 class ScholarshipSerializer(ModelSerializer):
@@ -185,7 +174,6 @@ class ScholarshipSerializer(ModelSerializer):
     class Meta:
         fields = (
             'id',
-            'student',
             'country',
             'university',
             'study_field',
@@ -194,14 +182,6 @@ class ScholarshipSerializer(ModelSerializer):
             'end_date',
         )
         model = Scholarship
-
-        validators = [
-            UniqueTogetherValidator(
-                queryset=Scholarship.objects.all(),
-                fields=['student', 'start_date'],
-                message='Scholarship for this student in this date already exists.',
-            ),
-        ]
 
 
 class StudentSerializer(ModelSerializer):

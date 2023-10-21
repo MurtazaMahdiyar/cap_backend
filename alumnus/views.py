@@ -19,7 +19,6 @@ class JobViewSet(ModelViewSet):
 
     def list(self, request):
         queryset = Job.objects.all()
-        print(request.user.profile_type)
         if request.user.profile_type == 'STUDENT':
             queryset = Job.objects.filter(student__profile__id=request.user.pk)
 
@@ -35,9 +34,8 @@ class JobViewSet(ModelViewSet):
 
 
     def perform_create(self, serializer):
-        count = Job.objects.filter(start_date__gte=datetime.date.today() - datetime.timedelta(30))
-        if count == 0:
-            serializer.save()
+        serializer.validated_data['student'] = Student.objects.get(pk=self.request.user.pk)    
+        serializer.save()
 
 
 class ScholarshipViewSet(ModelViewSet):
@@ -62,9 +60,8 @@ class ScholarshipViewSet(ModelViewSet):
         return Response(serializer.data)
 
     def perform_create(self, serializer):
-        count = Scholarship.objects.filter(start_date__gte=datetime.date.today() - datetime.timedelta(30))
-        if count == 0:
-            serializer.save()
+        serializer.validated_data['student'] = Student.objects.get(pk=self.request.user.pk)
+        serializer.save()
 
 
 class ClassViewSet(ModelViewSet):

@@ -10,7 +10,6 @@ class Job(models.Model):
 	student = models.ForeignKey(Student, related_name='jobs', on_delete=models.CASCADE)
 	company = models.CharField(max_length=100)
 	title = models.CharField(max_length=100)
-	position = models.CharField(max_length=254)
 	description = models.TextField()
 
 	start_date = models.DateField(default=datetime.date.today, blank=True)
