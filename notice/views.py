@@ -14,47 +14,54 @@ class NoticeViewSet(ModelViewSet):
 	permission_classes = (NoticePermission, )
 
 	def list(self, request):
-		if request.user.profile_type == 'STUDENT':
-			student = Student.objects.get(pk=request.user.pk)
-			if student.graduated:
-				queryset = Notice.objects.filter((Q(audience=AudienceChoices.ALUMNUS) | Q(audience=AudienceChoices.ALL)) and Q(faculty=student.student_class.department.faculty))
-			else:
-				queryset = Notice.objects.filter((Q(audience=AudienceChoices.STUDENT) | Q(audience=AudienceChoices.ALL)) and Q(faculty=student.student_class.department.faculty))
+		match(request.user.profile_type):
+			case 'STUDENT':
+				student = Student.objects.get(pk=request.user.pk)
+				if student.graduated:
+					# queryset = Notice.objects.filter((Q(faculty=student.student_class.department.faculty) | Q(faculty__isnull=True)) and (Q(audience=AudienceChoices.ALUMNUS) | Q(audience=AudienceChoices.ALL)))
+					queryset = Notice.objects.filter((Q(faculty=student.student_class.department.faculty) | Q(faculty__isnull=True)) and (Q(audience=AudienceChoices.ALUMNUS) | Q(audience=AudienceChoices.ALL)))
+				else:
+					queryset = Notice.objects.filter((Q(faculty=student.student_class.department.faculty) | Q(faculty__isnull=True)) and (Q(audience=AudienceChoices.STUDENT) | Q(audience=AudienceChoices.ALL)))
 
-		elif request.user.profile_type == 'TEACHER':
-			teacher = Teacher.objects.get(pk=request.user.pk)
-			queryset = Notice.objects.filter((Q(audience=AudienceChoices.TEACHER) | Q(audience=AudienceChoices.ALL)) and Q(faculty=teacher.department.faculty))
+			case 'TEACHER':
+				teacher = Teacher.objects.get(pk=request.user.pk)
+				queryset = Notice.objects.filter((Q(faculty=teacher.department.faculty) | Q(faculty__isnull=True)) and (Q(audience=AudienceChoices.TEACHER) | Q(audience=AudienceChoices.ALL)))
 
-		elif request.user.profile_type == 'ADMIN':
-			admin = Admin.objects.get(pk=request.user.pk)
-			queryset = Notice.objects.filter((Q(audience=AudienceChoices.STAFF) | Q(audience=AudienceChoices.ALL)) and (Q(faculty=admin.faculty) | Q(faculty__isnull=True)))
+			case 'ADMIN':
+				admin = Admin.objects.get(pk=request.user.pk)
+				# queryset = Notice.objects.filter((Q(audience=AudienceChoices.STAFF) | Q(audience=AudienceChoices.ALL)) and (Q(faculty=admin.faculty) | Q(faculty__isnull=True)))
+				queryset = Notice.objects.filter((Q(faculty=admin.faculty) | Q(faculty__isnull=True)) and (Q(audience=AudienceChoices.STAFF) | Q(audience=AudienceChoices.ALL)))
 
-		elif request.user.profile_type == 'SUPER_ADMIN':
-			queryset = Notice.objects.filter(author=request.user)
+			case 'SUPER_ADMIN':
+				queryset = Notice.objects.filter(author=request.user)
+
 
 		serializer = NoticeSerializer(queryset, many=True)
 		return Response(serializer.data)
 
 	def retrieve(self, request, pk=None):
-		if request.user.profile_type == 'STUDENT':
-			student = Student.objects.get(pk=request.user.pk)
-			if student.graduated:
-				queryset = Notice.objects.filter((Q(audience=AudienceChoices.ALUMNUS) | Q(audience=AudienceChoices.ALL)) and Q(faculty=student.student_class.department.faculty))
-			else:
-				queryset = Notice.objects.filter((Q(audience=AudienceChoices.STUDENT) | Q(audience=AudienceChoices.ALL)) and Q(faculty=student.student_class.department.faculty))
+		match(request.user.profile_type):
+			case 'STUDENT':
+				student = Student.objects.get(pk=request.user.pk)
+				if student.graduated:
+					queryset = Notice.objects.filter((Q(faculty=student.student_class.department.faculty) | Q(faculty__isnull=True)) and (Q(audience=AudienceChoices.ALUMNUS) | Q(audience=AudienceChoices.ALL)))
+				else:
+					queryset = Notice.objects.filter((Q(faculty=student.student_class.department.faculty) | Q(faculty__isnull=True)) and (Q(audience=AudienceChoices.STUDENT) | Q(audience=AudienceChoices.ALL)))
 
-		elif request.user.profile_type == 'TEACHER':
-			teacher = Teacher.objects.get(pk=request.user.pk)
-			queryset = Notice.objects.filter((Q(audience=AudienceChoices.TEACHER) | Q(audience=AudienceChoices.ALL)) and Q(faculty=teacher.department.faculty))
+			case 'TEACHER':
+				teacher = Teacher.objects.get(pk=request.user.pk)
+				queryset = Notice.objects.filter((Q(faculty=teacher.department.faculty) | Q(faculty__isnull=True)) and (Q(audience=AudienceChoices.TEACHER) | Q(audience=AudienceChoices.ALL)))
 
-		elif request.user.profile_type == 'ADMIN':
-			admin = Admin.objects.get(pk=request.user.pk)
-			queryset = Notice.objects.filter((Q(audience=AudienceChoices.STAFF) | Q(audience=AudienceChoices.ALL)) and (Q(faculty=admin.faculty) | Q(faculty__isnull=True)))
+			case 'ADMIN':
+				admin = Admin.objects.get(pk=request.user.pk)
+				queryset = Notice.objects.filter((Q(faculty=admin.faculty) | Q(faculty__isnull=True)) and (Q(audience=AudienceChoices.STAFF) | Q(audience=AudienceChoices.ALL)))
 
-		elif request.user.profile_type == 'SUPER_ADMIN':
-			queryset = Notice.objects.filter(author=request.user)
+			case 'SUPER_ADMIN':
+				queryset = Notice.objects.filter(author=request.user)
 
-		serializer = NoticeSerializer(queryset, many=True)
+
+		_object = get_object_or_404(queryset, pk=pk)
+		serializer = NoticeSerializer(_object)
 		return Response(serializer.data)
 
 

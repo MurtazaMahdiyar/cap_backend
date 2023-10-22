@@ -3,7 +3,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from .models import (
 	Notice,
 )
-from accounts.serializers import ProfileSerializer
+from accounts.serializers import ProfileSerializer, FacultySerializer
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 	@classmethod
@@ -27,6 +27,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 class NoticeSerializer(ModelSerializer):
 
 	author_info = ProfileSerializer(source='author', required=False)
+	faculty_info = FacultySerializer(source='faculty', required=False)
 
 	class Meta:
 		fields = (
@@ -36,10 +37,12 @@ class NoticeSerializer(ModelSerializer):
 			'description',
 			'attachment',
 			'registry_date',
+			'faculty_info',
 			'audience',
 		)
 		model = Notice
 
 		extra_kwargs = {
             'author_info': {'required': False, 'read_only': True},
+            'faculty_info': {'required': False, 'read_only': True},
 		}

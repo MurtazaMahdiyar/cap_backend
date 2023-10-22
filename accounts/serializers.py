@@ -174,6 +174,7 @@ class ScholarshipSerializer(ModelSerializer):
     class Meta:
         fields = (
             'id',
+            'degree',
             'country',
             'university',
             'study_field',

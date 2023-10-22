@@ -22,11 +22,19 @@ class Job(models.Model):
 		return self.title
 	
 
+class DegreeChoices(models.TextChoices):
+	BACHELOR = 'BACHELOR', _('Bachelor')
+	MASTER = 'MASTER', _('Master')
+	PHD = 'PHD', _('PHD')
+
+
+
 class Scholarship(models.Model):
 	student = models.ForeignKey(Student, related_name='scholarships', on_delete=models.CASCADE)
 	country = models.CharField(max_length=100)
 	university = models.CharField(max_length=150)
 	study_field = models.CharField(max_length=254)
+	degree = models.CharField(max_length=50, choices=DegreeChoices.choices, default=DegreeChoices.MASTER)
 	description = models.TextField()
 
 	start_date = models.DateField(default=datetime.date.today)
