@@ -22,9 +22,9 @@ class JobScholarshipPermission(permissions.BasePermission):
             if request.user.profile_type == 'ADMIN':
                 admin = Admin.objects.get(pk=request.user.pk)
                 return obj.student.student_class.department.faculty == admin.faculty
-            return obj.student == request.user or (request.user.profile_type in ['SUPER_ADMIN', 'ADMIN', 'STUDENT'])
+            return obj.student.profile == request.user or (request.user.profile_type in ['SUPER_ADMIN', 'ADMIN', 'STUDENT'])
         elif view.action in ['update', 'partial_update']:
-            return obj.student == request.user
+            return obj.student.profile == request.user
         elif view.action == 'destroy':
             return obj.student == request.user or (request.user.profile_type in ['SUPER_ADMIN'])
         else:

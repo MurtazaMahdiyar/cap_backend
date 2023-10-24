@@ -188,7 +188,6 @@ class ScholarshipSerializer(ModelSerializer):
 class StudentSerializer(ModelSerializer):
 
     student_profile = ProfileSerializer(source='profile', required=False)
-    # student_class_info = ClassSerializer(source='student_class', required=False)
     job_list = JobSerializer(source='jobs', required=False, many=True)
     scholarship_list = ScholarshipSerializer(source='scholarships', required=False, many=True)
     resultsheets = ResultSheetSerializer(source='students', required=False, many=True)
@@ -197,9 +196,9 @@ class StudentSerializer(ModelSerializer):
         fields = (
             'profile',
             'student_profile',
+            'student_class',
             'university_id',
             'father_name',
-            'student_class',
             'university_id_photo',
             'graduated',
             'status',
@@ -210,7 +209,6 @@ class StudentSerializer(ModelSerializer):
         model = Student
         extra_kwargs = {
             'student_profile': {'read_only': True},
-            # 'student_class_info': {'read_only': True},
             'job_list': {'read_only': True},
             'scholarship_list': {'read_only': True},
             'profile': {'required': True, 'write_only': True},
@@ -218,9 +216,6 @@ class StudentSerializer(ModelSerializer):
             'resultsheets': {'read_only': True},
             'university_id_photo': {'required': True},
         }
-        
-
-
 
 
 class TeacherSerializer(ModelSerializer):
