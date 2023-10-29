@@ -22,16 +22,10 @@ class Complaint(models.Model):
     comment = models.CharField(max_length=254, default="Your complaint received! thank you.")
     complaint_against = models.CharField(max_length=20, choices=ComplaintTarget.choices)
     faculty = models.ForeignKey(Faculty, on_delete=models.CASCADE, default=1)
+    attachment = models.FileField(upload_to='attachment/%Y/%m/%d', blank=True)
     private = models.BooleanField(default=False)
 
     date_created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.title
-
-class ComplaintDocument(models.Model):
-    document = models.FileField(upload_to='complaints/%Y/%m/%d')
-    complaint = models.ForeignKey(Complaint, related_name="document", on_delete=models.CASCADE)
-
-    def __str__(self):
-        return str(self.id) + ': ' + str(self.complaint)

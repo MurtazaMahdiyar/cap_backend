@@ -1,27 +1,12 @@
 from rest_framework.serializers import ModelSerializer, ListSerializer, PrimaryKeyRelatedField
-from .models import Complaint, ComplaintDocument
+from .models import Complaint
 from accounts.serializers import ProfileSerializer
 
-
-class ComplaintDocumentSerializer(ModelSerializer):
-
-	class Meta:
-		fields = (
-			'id',
-			'document',
-			'complaint',
-		)
-		model = ComplaintDocument
-
-		extra_kwargs = {
-            'complaint': {'required': True, 'write_only': True},
-        }
 
 
 class ComplaintSerializer(ModelSerializer):
 
 	profile_info = ProfileSerializer(source='profile', required=False)
-	documents_list = ComplaintDocumentSerializer(source='document', many=True, required=False)
 
 	class Meta:
 		fields = (
@@ -32,7 +17,7 @@ class ComplaintSerializer(ModelSerializer):
 			'status',
 			'comment',
 			'complaint_against',
-			'documents_list',
+			'attachment',
 			'date_created',
 			'private',
 		)
@@ -40,5 +25,4 @@ class ComplaintSerializer(ModelSerializer):
 
 		extra_kwargs = {
             'profile_info': {'required': False, 'read_only': True},
-			'documents_list': {'required': False, 'read_only': True},
         }

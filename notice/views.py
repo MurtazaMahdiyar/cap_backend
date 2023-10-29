@@ -18,10 +18,9 @@ class NoticeViewSet(ModelViewSet):
 			case 'STUDENT':
 				student = Student.objects.get(pk=request.user.pk)
 				if student.graduated:
-					# queryset = Notice.objects.filter((Q(faculty=student.student_class.department.faculty) | Q(faculty__isnull=True)) and (Q(audience=AudienceChoices.ALUMNUS) | Q(audience=AudienceChoices.ALL)))
 					queryset = Notice.objects.filter((Q(faculty=student.student_class.department.faculty) | Q(faculty__isnull=True)) and (Q(audience=AudienceChoices.ALUMNUS) | Q(audience=AudienceChoices.ALL)))
 				else:
-					queryset = Notice.objects.filter((Q(faculty=student.student_class.department.faculty) | Q(faculty__isnull=True)) and (Q(audience=AudienceChoices.STUDENT) | Q(audience=AudienceChoices.ALL)))
+					queryset = Notice.objects.filter((Q(faculty=student.student_class.department.faculty) | Q(faculty__isnull=True)) and (Q(audience=AudienceChoices.ALUMNUS) | Q(audience=AudienceChoices.ALL)))
 
 			case 'TEACHER':
 				teacher = Teacher.objects.get(pk=request.user.pk)
@@ -29,8 +28,7 @@ class NoticeViewSet(ModelViewSet):
 
 			case 'ADMIN':
 				admin = Admin.objects.get(pk=request.user.pk)
-				# queryset = Notice.objects.filter((Q(audience=AudienceChoices.STAFF) | Q(audience=AudienceChoices.ALL)) and (Q(faculty=admin.faculty) | Q(faculty__isnull=True)))
-				queryset = Notice.objects.filter((Q(faculty=admin.faculty) | Q(faculty__isnull=True)) and (Q(audience=AudienceChoices.STAFF) | Q(audience=AudienceChoices.ALL)))
+				queryset = Notice.objects.filter((Q(faculty=admin.faculty) | Q(faculty__isnull=True)) and (Q(audience=AudienceChoices.STAFF) | Q(audience=AudienceChoices.ALL)) | Q(author=request.user))
 
 			case 'SUPER_ADMIN':
 				queryset = Notice.objects.filter(author=request.user)

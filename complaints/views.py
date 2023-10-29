@@ -1,9 +1,8 @@
 from django.db.models import Q
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
-from django.shortcuts import get_object_or_404
 from .serializers import *
-from .permissions import ComplaintPermission, ComplaintDocumentPermission
+from .permissions import ComplaintPermission
 from accounts.models import Admin, Student, Teacher
 
 
@@ -14,7 +13,6 @@ class ComplaintViewSet(ModelViewSet):
 	permission_classes = (ComplaintPermission, )
 
 	def list(self, request):
-		queryset = Complaint.objects.prefetch_related('document').all()
 		if request.user.profile_type in ['STUDENT', 'TEACHER']:
 			queryset = Complaint.objects.filter(profile__id=request.user.id)
 
@@ -26,12 +24,6 @@ class ComplaintViewSet(ModelViewSet):
 			queryset = Complaint.objects.filter(complaint_against='STAFF')
 
 		serializer = ComplaintSerializer(queryset, many=True)
-		return Response(serializer.data)
-
-	def retrieve(self, request, pk = None, *args, **kwargs):
-		queryset = Complaint.objects.prefetch_related('document').all()
-		complaint = get_object_or_404(queryset, pk=pk)
-		serializer = ComplaintSerializer(complaint)
 		return Response(serializer.data)
 	
 
@@ -65,19 +57,3 @@ class ComplaintViewSet(ModelViewSet):
 		serializer.validated_data['profile'] = self.request.user
 
 		return super().perform_create(serializer)
-
-class ComplaintDocumentViewSet(ModelViewSet):
-	queryset = ComplaintDocument.objects.all()
-	serializer_class = ComplaintDocumentSerializer
-	permission_classes = (ComplaintDocumentPermission, )
-
-	def list(self, request):
-		if request.user.profile_type in ['STUDENT', 'TEACHER']:
-			queryset = ComplaintDocument.objects.filter(complaint__profile=request.user)
-		elif request.user.profile_type == 'ADMIN':
-			admin = Admin.objects.get(pk=request.user.pk)
-			queryset = Complaint.objects.filter(Q(complaint__student__student_class__department__faculty=admin.faculty) & ~Q(complaint__complaint_against = 'STAFF'))
-		else:
-			queryset = ComplaintDocument.objects.all()
-		serializer = ComplaintDocumentSerializer(queryset, many=True)
-		return Response(serializer.data)

@@ -26,7 +26,7 @@ class JobScholarshipPermission(permissions.BasePermission):
         elif view.action in ['update', 'partial_update']:
             return obj.student.profile == request.user
         elif view.action == 'destroy':
-            return obj.student == request.user or (request.user.profile_type in ['SUPER_ADMIN'])
+            return obj.student.profile == request.user or (request.user.profile_type in ['SUPER_ADMIN'])
         else:
             return False
 
