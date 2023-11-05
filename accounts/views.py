@@ -1,4 +1,5 @@
 from rest_framework.viewsets import ModelViewSet
+from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from django.contrib.auth.hashers import make_password
 from .permissions import (
@@ -49,10 +50,32 @@ class StudentViewSet(ModelViewSet):
     permission_classes = (StudentPermission, )
 
 
+
     def list(self, request):
-        queryset = Student.objects.prefetch_related(*['jobs', 'scholarships']).all()
+
+        if request.user.profile_type == 'ADMIN':
+            admin = Admin.objects.get(pk=request.user.id)
+            queryset = Student.objects.prefetch_related(*['jobs', 'scholarships']).filter(student_class__department__faculty = admin.faculty)
+
+        elif request.user.profile_type == 'SUPER_ADMIN':
+            queryset = Student.objects.prefetch_related(*['jobs', 'scholarships']).all()
+
         serializer = StudentSerializer(queryset, many=True)
         return Response(serializer.data)
+
+    def retrieve(self, request, pk=None):
+        queryset = Student.objects.all()
+        if request.user.profile_type == 'ADMIN':
+            admin = Admin.objects.get(pk=request.user.id)
+            queryset = Student.objects.prefetch_related(*['jobs', 'scholarships']).filter(student_class__department__faculty = admin.faculty)
+
+        elif request.user.profile_type == 'SUPER_ADMIN':
+            queryset = Student.objects.prefetch_related(*['jobs', 'scholarships']).all()
+        
+        _object = get_object_or_404(queryset, pk=pk)
+        serializer = StudentSerializer(_object)
+        return Response(serializer.data)
+
 
     def perform_create(self, serializer):
         if serializer.validated_data['profile'].profile_type == '':
@@ -84,6 +107,32 @@ class TeacherViewSet(ModelViewSet):
     queryset = Teacher.objects.all()
     serializer_class = TeacherSerializer
     permission_classes = (TeacherPermission, )
+
+
+    def list(self, request):
+
+        if request.user.profile_type == 'ADMIN':
+            admin = Admin.objects.get(pk=request.user.id)
+            queryset = Teacher.objects.filter(department__faculty = admin.faculty)
+
+        elif request.user.profile_type == 'SUPER_ADMIN':
+            queryset = Teacher.objects.all()
+
+        serializer = TeacherSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def retrieve(self, request, pk=None):
+
+        if request.user.profile_type == 'ADMIN':
+            admin = Admin.objects.get(pk=request.user.id)
+            queryset = Teacher.objects.filter(department__faculty = admin.faculty)
+
+        elif request.user.profile_type == 'SUPER_ADMIN':
+            queryset = Teacher.objects.all()
+        
+        _object = get_object_or_404(queryset, pk=pk)
+        serializer = TeacherSerializer(_object)
+        return Response(serializer.data)
 
     def perform_create(self, serializer):
         if serializer.validated_data['profile'].profile_type == '':

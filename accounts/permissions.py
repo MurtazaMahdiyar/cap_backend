@@ -137,7 +137,7 @@ class SuperAdminPermission(permissions.BasePermission):
         if view.action == 'retrieve':
             return obj.pk == request.user.pk or (request.user.profile_type in ['SUPER_ADMIN'])
         elif view.action in ['update', 'partial_update', 'destroy']:
-            return request.user.is_authenticated and obj.pk == request.user.pk
+            return request.user.is_authenticated and obj.profile_type == 'SUPER_ADMIN'
         else:
             return False
         

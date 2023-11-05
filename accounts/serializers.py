@@ -212,7 +212,7 @@ class StudentSerializer(ModelSerializer):
             'job_list': {'read_only': True},
             'scholarship_list': {'read_only': True},
             'profile': {'required': True, 'write_only': True},
-            'student_class': {'required': True, 'write_only': True},
+            'student_class': {'required': True},
             'resultsheets': {'read_only': True},
             'university_id_photo': {'required': True},
         }
