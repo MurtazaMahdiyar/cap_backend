@@ -1,5 +1,5 @@
 from rest_framework import permissions
-
+from .models import Admin
 
 class ProfilePermission(permissions.BasePermission):
     
@@ -23,7 +23,7 @@ class ProfilePermission(permissions.BasePermission):
         elif view.action in ['update', 'partial_update']:
             return obj == request.user or request.user.profile_type in ['SUPER_ADMIN', 'ADMIN']
         elif view.action == 'destroy':
-            return request.user.is_authenticated and (request.user.profile_type == 'SUPER_ADMIN')
+            return request.user.is_authenticated and (request.user.profile_type in ['SUPER_ADMIN', 'ADMIN'])
         else:
             return False
 
@@ -32,7 +32,7 @@ class StudentPermission(permissions.BasePermission):
 
     def has_permission(self, request, view):
         if view.action == 'list':
-            return request.user.is_authenticated and (request.user.profile_type in ['ADMIN', 'SUPER_ADMIN'])
+            return request.user.is_authenticated and (request.user.profile_type in ['ADMIN', 'SUPER_ADMIN', 'TEACHER'])
         elif view.action == 'create':
             return True
         elif view.action in ['retrieve', 'update', 'partial_update', 'destroy']:
@@ -47,12 +47,29 @@ class StudentPermission(permissions.BasePermission):
             return False
 
         if view.action == 'retrieve':
-            return obj.pk == request.user.pk or (request.user.profile_type in ['ADMIN', 'SUPER_ADMIN'])
+            
+            if request.user.profile_type == 'ADMIN':
+                admin = Admin.objects.get(pk = request.user.pk)
+                return admin.faculty == obj.student_class.department.faculty
+
+            return request.user.profile_type == 'SUPER_ADMIN'
+            
         elif view.action in ['update', 'partial_update']:
-            print(obj.pk)
-            return request.user.pk == obj.pk or (request.user.profile_type in ['ADMIN', 'SUPER_ADMIN'])
+            
+            if request.user.profile_type == 'ADMIN':
+                admin = Admin.objects.get(pk = request.user.pk)
+                return admin.faculty == obj.student_class.department.faculty
+
+            return request.user.profile_type == 'SUPER_ADMIN'
+
         elif view.action == 'destroy':
-            return request.user.is_authenticated and (request.user.profile_type in ['SUPER_ADMIN'])
+
+            if request.user.profile_type == 'ADMIN':
+                admin = Admin.objects.get(pk = request.user.pk)
+                return admin.faculty == obj.student_class.department.faculty
+
+            return request.user.profile_type == 'SUPER_ADMIN'
+
         else:
             return False
 
@@ -137,7 +154,7 @@ class SuperAdminPermission(permissions.BasePermission):
         if view.action == 'retrieve':
             return obj.pk == request.user.pk or (request.user.profile_type in ['SUPER_ADMIN'])
         elif view.action in ['update', 'partial_update', 'destroy']:
-            return request.user.is_authenticated and obj.profile_type == 'SUPER_ADMIN'
+            return  obj.profile_type == 'SUPER_ADMIN'
         else:
             return False
         
@@ -163,9 +180,9 @@ class FacultyPermission(permissions.BasePermission):
         if view.action == 'retrieve':
             return request.user.is_authenticated
         elif view.action in ['update', 'partial_update']:
-            return request.user.is_authenticated and request.user.profile_type == 'SUPER_ADMIN'
+            return request.user.profile_type == 'SUPER_ADMIN'
         elif view.action == 'destroy':
-            return request.user.is_authenticated and request.user.profile_type == 'SUPER_ADMIN'
+            return request.user.profile_type == 'SUPER_ADMIN'
         else:
             return False
 
@@ -190,8 +207,12 @@ class DepartmentPermission(permissions.BasePermission):
         if view.action == 'retrieve':
             return request.user.is_authenticated
         elif view.action in ['update', 'partial_update']:
-            return request.user.is_authenticated and (request.user.profile_type == 'SUPER_ADMIN' or (request.user.profile_type == 'ADMIN' and request.user.faculty == obj.faculty))
+
+            return request.user.profile_type == 'SUPER_ADMIN'
+
         elif view.action == 'destroy':
-            return request.user.is_authenticated and (request.user.profile_type == 'SUPER_ADMIN' or (request.user.profile_type == 'ADMIN' and request.user.faculty == obj.faculty))
+
+            return request.user.profile_type == 'SUPER_ADMIN'
+
         else:
             return False

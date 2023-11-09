@@ -94,14 +94,15 @@ class Department(models.Model):
 
 
 class Class(models.Model):
-	name = models.CharField(max_length=150)
+	name = models.CharField(max_length=150, default="no-name", blank=True)
 	department = models.ForeignKey(Department, on_delete=models.CASCADE)
 	year = models.CharField(max_length=4, default=datetime.datetime.now().year, blank=True)
+	is_graduated = models.BooleanField(default=False)
 
 	class Meta:
 		verbose_name = 'Class'
 		verbose_name_plural = 'Classes'
-		unique_together = ('name', 'department', 'year')
+		unique_together = ('department', 'year')
 
 	def __str__(self):
 		return self.year + '-' + self.name + '-' + str(self.department)
@@ -144,11 +145,10 @@ class Teacher(models.Model):
 
 class Admin(models.Model):
 	profile = models.OneToOneField(Profile, on_delete=models.CASCADE, primary_key=True)
-	faculty = models.OneToOneField(Faculty, on_delete=models.CASCADE)
+	faculty = models.OneToOneField(Faculty, on_delete=models.CASCADE, unique=True, null=True)
 
 	class Meta:
 		verbose_name = 'Admin'
-		unique_together = ('profile', 'faculty')
 
 	def __str__(self) -> str:
 		return self.profile.__str__() + ': ' + self.faculty.__str__()

@@ -79,7 +79,7 @@ class ResultSheetSerializer(ModelSerializer):
         
         extra_kwargs = {
             'subject': {'required': True, 'write_only': True},
-            'student': {'required': True, 'write_only': True},
+            'student': {'required': True},
         }
 
         validators = [
@@ -105,20 +105,23 @@ class ClassSerializer(ModelSerializer):
             'department',
             'department_info',
             'subject_list',
+            'is_graduated',
         )
         model = Class
 
         extra_kwargs = {
+            'name': {'required': False},
             'department': {'required': True, 'write_only': True},
             'department_info': {'read_only': True},
             'subject_list': {'read_only': True},
+            'is_graduated': {'required': False},
         }
 
         validators = [
             UniqueTogetherValidator(
                 queryset=Class.objects.all(),
-                fields=['name', 'department', 'year'],
-                message='Class with given name already exists in this department.',
+                fields=['department', 'year'],
+                message='Class with given year already exists in this department.',
             ),
         ]
 

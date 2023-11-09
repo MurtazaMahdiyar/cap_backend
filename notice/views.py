@@ -5,7 +5,7 @@ from django.db.models import Q
 from .serializers import *
 from .models import Notice, AudienceChoices
 from .permissions import NoticePermission
-from accounts.models import Student, Admin, SuperAdmin, Teacher
+from accounts.models import Student, Admin, Teacher
 
 
 class NoticeViewSet(ModelViewSet):
@@ -20,7 +20,7 @@ class NoticeViewSet(ModelViewSet):
 				if student.graduated:
 					queryset = Notice.objects.filter((Q(faculty=student.student_class.department.faculty) | Q(faculty__isnull=True)) and (Q(audience=AudienceChoices.ALUMNUS) | Q(audience=AudienceChoices.ALL)))
 				else:
-					queryset = Notice.objects.filter((Q(faculty=student.student_class.department.faculty) | Q(faculty__isnull=True)) and (Q(audience=AudienceChoices.ALUMNUS) | Q(audience=AudienceChoices.ALL)))
+					queryset = Notice.objects.filter((Q(faculty=student.student_class.department.faculty) | Q(faculty__isnull=True)) and (Q(audience=AudienceChoices.STUDENT) | Q(audience=AudienceChoices.ALL)))
 
 			case 'TEACHER':
 				teacher = Teacher.objects.get(pk=request.user.pk)

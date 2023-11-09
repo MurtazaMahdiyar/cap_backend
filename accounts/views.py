@@ -49,9 +49,17 @@ class StudentViewSet(ModelViewSet):
     serializer_class = StudentSerializer
     permission_classes = (StudentPermission, )
 
-
-
     def list(self, request):
+
+        if request.user.profile_type == 'TEACHER':
+            teacher = Teacher.objects.get(pk=request.user.id)
+            subjects = Subject.objects.filter(teacher=teacher)
+
+            classes = []
+            for sub in subjects:
+                classes.append(sub.subject_class)
+
+            queryset = Student.objects.filter(student_class__in=classes)
 
         if request.user.profile_type == 'ADMIN':
             admin = Admin.objects.get(pk=request.user.id)
@@ -122,6 +130,9 @@ class TeacherViewSet(ModelViewSet):
         return Response(serializer.data)
 
     def retrieve(self, request, pk=None):
+
+        if request.user.profile_type == 'TEACHER':
+            queryset = Teacher.objects.filter(profile=request.user)
 
         if request.user.profile_type == 'ADMIN':
             admin = Admin.objects.get(pk=request.user.id)
@@ -251,3 +262,15 @@ class DepartmentViewSet(ModelViewSet):
                 serializer.save()
         else:
             serializer.save()
+
+    
+    def perform_destroy(self, instance):
+
+        teachers = Teacher.objects.filter(department=instance)
+
+        for teacher in teachers:
+            profile = teacher.profile
+            profile.delete()
+            teacher.delete()
+
+        instance.delete()
