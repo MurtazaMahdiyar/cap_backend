@@ -150,7 +150,7 @@ class ProfileSerializer(ModelSerializer):
             'gender': {'required': True, },
             'date_of_birth': {'required': True, },
             'profile_type': {'required': False, 'read_only': True},
-            'personal_photo': {'required': True},
+            'personal_photo': {'required': False},
         }
 
 
@@ -217,7 +217,7 @@ class StudentSerializer(ModelSerializer):
             'profile': {'required': True, 'write_only': True},
             'student_class': {'required': True},
             'resultsheets': {'read_only': True},
-            'university_id_photo': {'required': True},
+            'university_id_photo': {'required': False},
         }
 
 
