@@ -28,7 +28,7 @@ class NoticeViewSet(ModelViewSet):
 
 			case 'ADMIN':
 				admin = Admin.objects.get(pk=request.user.pk)
-				queryset = Notice.objects.filter(Q(faculty=admin.faculty) | Q(faculty__isnull=True)).filter(Q(audience=AudienceChoices.STAFF) | Q(audience=AudienceChoices.ALL)) | Q(author=request.user)
+				queryset = Notice.objects.filter(Q(faculty=admin.faculty) | Q(faculty__isnull=True)).filter(Q(audience=AudienceChoices.STAFF) | Q(audience=AudienceChoices.ALL) | Q(author=request.user))
 
 			case 'SUPER_ADMIN':
 				queryset = Notice.objects.filter(author=request.user)
