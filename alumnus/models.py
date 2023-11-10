@@ -55,7 +55,7 @@ class Subject(models.Model):
 	teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
 	subject_class = models.ForeignKey(Class, related_name='subjects', on_delete=models.CASCADE)
 	semester = models.PositiveSmallIntegerField(default=1, validators=[
-		MaxValueValidator(8),
+		MaxValueValidator(10),
 		MinValueValidator(1),
 	])
 
