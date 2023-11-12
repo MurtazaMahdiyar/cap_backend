@@ -144,6 +144,7 @@ class ProfileSerializer(ModelSerializer):
             'profile_type',
             'date_of_birth',
             'personal_photo',
+            'device',
         )
         extra_kwargs = {
             'email': {'required': True, },
@@ -151,6 +152,7 @@ class ProfileSerializer(ModelSerializer):
             'date_of_birth': {'required': True, },
             'profile_type': {'required': False, 'read_only': True},
             'personal_photo': {'required': False},
+            'device': {'required' : False, 'write_only': True},
         }
 
 

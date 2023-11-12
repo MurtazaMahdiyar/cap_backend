@@ -60,6 +60,9 @@ class StudentPermission(permissions.BasePermission):
                 admin = Admin.objects.get(pk = request.user.pk)
                 return admin.faculty == obj.student_class.department.faculty
 
+            if request.user.profile_type == 'STUDENT':
+                return request.user.id == obj.profile.id
+
             return request.user.profile_type == 'SUPER_ADMIN'
 
         elif view.action == 'destroy':

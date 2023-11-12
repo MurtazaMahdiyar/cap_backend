@@ -67,6 +67,7 @@ class Profile(AbstractUser):
 	date_of_birth = models.DateField(default=datetime.date.today)
 	personal_photo = models.ImageField(upload_to='image/profile/%Y/%m/%d', blank=True)
 	phone = models.CharField(max_length=15, unique=True)
+	device = models.CharField(max_length=255, default='', blank=True)
 
 	objects = ProfileManager()
 
