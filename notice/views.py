@@ -6,6 +6,7 @@ from .serializers import *
 from .models import Notice, AudienceChoices
 from .permissions import NoticePermission
 from accounts.models import Student, Admin, Teacher
+from django.core.mail import send_mail
 
 
 class NoticeViewSet(ModelViewSet):
@@ -14,6 +15,7 @@ class NoticeViewSet(ModelViewSet):
 	permission_classes = (NoticePermission, )
 
 	def list(self, request):
+
 		match(request.user.profile_type):
 			case 'STUDENT':
 				student = Student.objects.get(pk=request.user.pk)
@@ -71,4 +73,113 @@ class NoticeViewSet(ModelViewSet):
 
 		serializer.validated_data['faculty'] = notice_faculty
 		serializer.validated_data['author'] = self.request.user
-		return super().perform_create(serializer)
+		instance = super().perform_create(serializer)
+
+		try:
+			if serializer.validated_data['audience'] in ['ALUMNUS']:
+				# SEND EMAIL TO ALUMNUS
+				students = Student.objects.filter(graduated=True)
+
+				if notice_faculty is not None:
+					students.filter(student_class__department__faculty=notice_faculty)
+
+				list_emails = []
+				for student in students:
+					list_emails.append(student.profile.email)
+
+				send_mail(
+				    serializer.validated_data['title'],
+				    serializer.validated_data['description'],
+				    "admin@cap.com",
+				    list_emails,
+				    fail_silently=False,
+				)
+
+			elif serializer.validated_data['audience'] in ['STUDENT']:
+				# SEND EMAIL TO ALUMNUS
+				students = Student.objects.filter(graduated=False)
+
+				if notice_faculty is not None:
+					students.filter(student_class__department__faculty=notice_faculty)
+
+				list_emails = []
+				for student in students:
+					list_emails.append(student.profile.email)
+
+				send_mail(
+				    serializer.validated_data['title'],
+				    serializer.validated_data['description'],
+				    "admin@cap.com",
+				    list_emails,
+				    fail_silently=False,
+				)
+
+
+			elif serializer.validated_data['audience'] in ['TEACHER']:
+				teachers = Teacher.objects.all()
+
+				if notice_faculty is not None:
+					teachers.filter(faculty=notice_faculty)
+
+				list_emails = []
+				for teacher in teachers:
+					list_emails.append(teacher.profile.email)
+
+				send_mail(
+				    serializer.validated_data['title'],
+				    serializer.validated_data['description'],
+				    "admin@cap.com",
+				    list_emails,
+				    fail_silently=False,
+				)
+
+			elif serializer.validated_data['audience'] in ['ADMIN']:
+				admins = Admin.objects.all()
+
+				if notice_faculty is not None:
+					admins.filter(faculty=notice_faculty)
+
+				list_emails = []
+				for admin in admins:
+					list_emails.append(admin.profile.email)
+
+				send_mail(
+				    serializer.validated_data['title'],
+				    serializer.validated_data['description'],
+				    "admin@cap.com",
+				    list_emails,
+				    fail_silently=False,
+				)
+
+			elif serializer.validated_data['audience'] == 'ALL':
+				admins = Admin.objects.all()
+				students = Student.objects.all()
+				teachers = Teacher.objects.all()
+
+
+				if notice_faculty is not None:
+					admins.filter(faculty=notice_faculty)
+					students.filter(student_class__department__faculty=notice_faculty)
+					teachers.filter(faculty=notice_faculty)
+
+				list_emails = []
+				for admin in admins:
+					list_emails.append(admin.profile.email)
+
+				for teacher in teachers:
+					list_emails.append(admin.profile.email)
+
+				for student in students:
+					list_emails.append(admin.profile.email)
+
+				send_mail(
+				    serializer.validated_data['title'],
+				    serializer.validated_data['description'],
+				    "admin@cap.com",
+				    list_emails,
+				    fail_silently=False,
+				)
+		except:
+			pass
+
+		return instance
